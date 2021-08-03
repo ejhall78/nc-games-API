@@ -48,8 +48,7 @@ describe('GET - /api/reviews', () => {
       return request(app)
         .get('/api/reviews/2')
         .expect(200)
-        .then(res => {
-          const review = res.body.review;
+        .then(({ body: { review } }) => {
           expect(review).toMatchObject({
             owner: 'philippaclaire9',
             title: 'Jenga',
@@ -63,6 +62,14 @@ describe('GET - /api/reviews', () => {
             votes: 5,
             comment_count: 3,
           });
+        });
+    });
+    test('400 - sends custom message when id is invalid', () => {
+      return request(app)
+        .get('/api/reviews/invalid')
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('Invalid review ID. Please use a number :-)');
         });
     });
   });

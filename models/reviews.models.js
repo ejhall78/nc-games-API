@@ -21,8 +21,5 @@ exports.selectReviewById = async review_id => {
 
   review.comment_count = commentCount;
 
-  // console.log(review_IDs);
-  // console.log(review);
-
   return review;
 };

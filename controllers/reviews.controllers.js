@@ -6,5 +6,5 @@ exports.getReviewById = (req, res, next) => {
     .then(review => {
       res.status(200).send({ review });
     })
-    .catch(next);
+    .catch(err => next(err));
 };
