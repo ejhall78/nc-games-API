@@ -60,7 +60,7 @@ describe('GET - /api/reviews', () => {
             category: 'dexterity',
             created_at: new Date(1610964101251).toJSON(),
             votes: 5,
-            comment_count: 3,
+            comment_count: '3',
           });
         });
     });
@@ -70,6 +70,14 @@ describe('GET - /api/reviews', () => {
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe('Invalid review ID. Please use a number :-)');
+        });
+    });
+    test('404 - sends custom message when valid id but does not exist', () => {
+      return request(app)
+        .get('/api/reviews/1000000')
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('Review does not exist. Try a lower number :-)');
         });
     });
   });
