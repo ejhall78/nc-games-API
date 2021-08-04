@@ -10,5 +10,11 @@ exports.pgErrors = (err, req, res, next) => {
 };
 
 exports.customErrors = (err, req, res, next) => {
-  res.status(err.status).send({ msg: err.msg });
+  if (err.status) {
+    res.status(err.status).send({ msg: err.msg });
+  } else next(err);
+};
+
+exports.handle500s = (err, req, res, next) => {
+  res.status(500).send({ msg: 'Whoops! Something went wrong!' });
 };
