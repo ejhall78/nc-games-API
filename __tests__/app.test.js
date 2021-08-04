@@ -68,7 +68,7 @@ describe('/api/reviews', () => {
           });
         });
     });
-    test('400 - sends custom message when id is invalid', () => {
+    test('400 - id is invalid', () => {
       return request(app)
         .get('/api/reviews/invalid')
         .expect(400)
@@ -76,7 +76,7 @@ describe('/api/reviews', () => {
           expect(msg).toBe('Invalid review ID. Please use a number :-)');
         });
     });
-    test('404 - sends custom message when valid id but does not exist', () => {
+    test('404 - valid id but does not exist', () => {
       return request(app)
         .get('/api/reviews/1000000')
         .expect(404)
@@ -84,7 +84,7 @@ describe('/api/reviews', () => {
           expect(msg).toBe('Review does not exist. Try a lower number :-)');
         });
     });
-    test.only('PATCH 200 - updates review votes and responds with the updated review', () => {
+    test('PATCH 200 - updates review votes and responds with the updated review', () => {
       return request(app)
         .patch('/api/reviews/3')
         .expect(200)
@@ -103,6 +103,39 @@ describe('/api/reviews', () => {
             votes: 7,
             comment_count: '3',
           });
+        });
+    });
+    test('400 - request body contains no/invalid key of inc_votes', () => {
+      return request(app)
+        .patch('/api/reviews/3')
+        .expect(400)
+        .send({ invalid_key: 2 })
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe(
+            'Cannot update votes! Make sure you only include a key of "inc_votes" :-)'
+          );
+        });
+    });
+    test('400 - invalid increment value eg inc_votes: "cat"', () => {
+      return request(app)
+        .patch('/api/reviews/3')
+        .expect(400)
+        .send({ inc_votes: 'cat' })
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe(
+            'Cannot update votes! Make sure your newVotes value is a number :-)'
+          );
+        });
+    });
+    test('400 - other unwanted properties on request body eg { inc_votes : 1, name: "Mitch" }', () => {
+      return request(app)
+        .patch('/api/reviews/3')
+        .expect(400)
+        .send({ inc_votes: 2, name: 'Mitch' })
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe(
+            'Cannot update votes! Make sure you only include inc_votes on your request :-)'
+          );
         });
     });
   });
