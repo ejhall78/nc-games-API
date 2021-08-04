@@ -1,10 +1,6 @@
 const db = require('../db/connection');
 
 exports.selectReviewById = async review_id => {
-  // const { rows: review_IDs } = await db.query(
-  //   `SELECT review_id FROM comments;`
-  // );
-
   const result = await db.query(
     `
     SELECT reviews.*, COUNT(comments.review_id) 
@@ -27,17 +23,20 @@ exports.selectReviewById = async review_id => {
 
   const review = result.rows[0];
 
-  console.log(review);
-
-  // let commentCount = 0;
-
-  // for (let i = 0; i < review_IDs.length; i++) {
-  //   if (review_IDs[i].review_id === review.review_id) {
-  //     commentCount++;
-  //   }
-  // }
-
-  // review.comment_count = commentCount;
-
   return review;
+};
+
+exports.updateVotes = async ({ inc_votes, review_id }) => {
+  await db.query(
+    `
+    UPDATE reviews
+    SET
+      votes = votes + $1
+    WHERE review_id = $2;`,
+    [inc_votes, review_id]
+  );
+
+  const updatedReview = await this.selectReviewById(review_id);
+
+  return updatedReview;
 };

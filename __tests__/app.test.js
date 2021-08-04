@@ -37,14 +37,18 @@ describe('GET - /api/categories', () => {
   });
 });
 
-describe('GET - /api/reviews', () => {
+describe('/api/reviews', () => {
   describe('/:review_id', () => {
-    // 200 :) - gets user by id
+    // GET 200 - gets user by id
+    // 400 - invalid id
+    // 404 - valid id but doesn't exist
 
-    // 400 :( - invalid id
-    // 404 :( - valid id but doesn't exist
+    // PATCH 201 - updates votes of a review
+    // 400 - no/invalid key of 'inc_votes' in request body
+    // 400 - invalid increment value eg inc_votes: "cat"
+    // 400 - other unwanted properties on request body eg { inc_votes : 1, name: 'Mitch' }
 
-    test('200 - correctly gets a valid user', () => {
+    test('GET 200 - correctly gets a valid user', () => {
       return request(app)
         .get('/api/reviews/2')
         .expect(200)
@@ -52,7 +56,7 @@ describe('GET - /api/reviews', () => {
           expect(review).toMatchObject({
             owner: 'philippaclaire9',
             title: 'Jenga',
-            review_id: expect.any(Number),
+            review_id: 2,
             review_body: 'Fiddly fun for all the family',
             designer: 'Leslie Scott',
             review_img_url:
@@ -78,6 +82,27 @@ describe('GET - /api/reviews', () => {
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toBe('Review does not exist. Try a lower number :-)');
+        });
+    });
+    test.only('PATCH 200 - updates review votes and responds with the updated review', () => {
+      return request(app)
+        .patch('/api/reviews/3')
+        .expect(200)
+        .send({ inc_votes: 2 })
+        .then(({ body: { review } }) => {
+          expect(review).toMatchObject({
+            owner: 'bainesface',
+            title: 'Ultimate Werewolf',
+            review_id: 3,
+            review_body: "We couldn't find the werewolf!",
+            designer: 'Akihisa Okui',
+            review_img_url:
+              'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+            category: 'social deduction',
+            created_at: new Date(1610964101251).toJSON(),
+            votes: 7,
+            comment_count: '3',
+          });
         });
     });
   });
