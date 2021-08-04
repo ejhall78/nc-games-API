@@ -38,6 +38,41 @@ describe('GET - /api/categories', () => {
 });
 
 describe('/api/reviews', () => {
+  // GET 200 - responds with reviews
+
+  // 400 - sort_by and invalid column
+  // 400 - order !== "asc" or "desc"
+  // 404 - category that doesn't exist
+  // 200 - category that exists but doesn't have any reviews - respond with empty array
+  test('200 GET responds with an array of reviews', () => {
+    return request(app)
+      .get('/api/reviews')
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        reviews.forEach(review => {
+          expect(review).toMatchObject({
+            owner: expect.any(String),
+            title: expect.any(String),
+            review_id: expect.any(Number),
+            category: expect.any(String),
+            review_img_url: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            comment_count: expect.any(String),
+          });
+        });
+      });
+  });
+  test('reviews array is sorted by DATE by default', () => {
+    return request(app)
+      .get('/api/reviews')
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        expect(reviews).toBeSortedBy('created_at');
+      });
+  });
+  test('allows for a sort_by query to sort reviews by any valid column', () => {});
+
   describe('/:review_id', () => {
     // GET 200 - gets user by id
     // 400 - invalid id
