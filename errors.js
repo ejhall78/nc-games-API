@@ -3,6 +3,7 @@ exports.handle404s = (req, res, next) => {
 };
 
 exports.pgErrors = (err, req, res, next) => {
+  // console.log(err);
   if (err.code === '22P02') {
     res.status(400).send({ msg: 'Invalid review ID. Please use a number :-)' });
   } else next(err);
@@ -15,5 +16,6 @@ exports.customErrors = (err, req, res, next) => {
 };
 
 exports.handle500s = (err, req, res, next) => {
+  // console.log(err);
   res.status(500).send({ msg: 'Whoops! Something went wrong!' });
 };

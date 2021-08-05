@@ -33,7 +33,10 @@ exports.patchVotes = (req, res, next) => {
 };
 
 exports.getReviews = (req, res, next) => {
-  selectReviews()
+  const { sort_by, order } = req.query;
+  const queryObj = { sort_by, order };
+
+  selectReviews(queryObj)
     .then(reviews => {
       res.status(200).send({ reviews });
     })

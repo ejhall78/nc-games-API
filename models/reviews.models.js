@@ -55,7 +55,34 @@ exports.updateVotes = async ({ inc_votes, review_id }) => {
   return updatedReview;
 };
 
-exports.selectReviews = async () => {
+exports.selectReviews = async ({ sort_by = 'created_at', order = 'asc' }) => {
+  // sanitize sort_by
+  if (
+    ![
+      'owner',
+      'title',
+      'review_id',
+      'category',
+      'review_img_url',
+      'created_at',
+      'votes',
+      'comment_count',
+    ].includes(sort_by)
+  ) {
+    return Promise.reject({
+      status: 400,
+      msg: 'Cannot sort by a column name that does not exist. Please try one of the following: owner, title, review_id, category, review_img_url, created_at, votes, comment_count :-)',
+    });
+  }
+
+  // sanitize order
+  if (!['asc', 'desc'].includes(order)) {
+    return Promise.reject({
+      status: 400,
+      msg: 'Invalid order. Please try either asc or desc :-)',
+    });
+  }
+
   const result = await db.query(`
     SELECT 
       reviews.owner, 
@@ -70,7 +97,7 @@ exports.selectReviews = async () => {
     FULL OUTER JOIN comments
     ON reviews.review_id = comments.review_id
     GROUP BY reviews.review_id
-    ORDER BY reviews.created_at ASC;`);
+    ORDER BY reviews.${sort_by} ${order};`);
 
   const reviews = result.rows;
 
