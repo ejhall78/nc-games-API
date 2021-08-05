@@ -253,3 +253,25 @@ describe('/api/reviews/:review_id', () => {
       });
   });
 });
+
+describe('/api/reviews/:review_id/comments', () => {
+  // 200 GET - responds with an array of comments for the given review id
+
+  // 201 POST - adds a comment to the db and responds with the posted comment
+  test('200 GET - responds with comments for given review id', () => {
+    return request(app)
+      .get('/api/reviews/2/comments')
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        body.forEach(comment => {
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+          });
+        });
+      });
+  });
+});
