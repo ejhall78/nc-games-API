@@ -103,6 +103,16 @@ describe('/api/reviews', () => {
         });
       });
   });
+  test('200 - filter review results by category', () => {
+    return request(app)
+      .get('/api/reviews?category=social_deduction')
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        reviews.forEach(review => {
+          expect(review.category).toBe('social deduction');
+        });
+      });
+  });
 
   test('400 - sort_by an invalid column', () => {
     return request(app)
@@ -114,14 +124,32 @@ describe('/api/reviews', () => {
         );
       });
   });
-});
-test('400 - order !== "asc" or "desc"', () => {
-  return request(app)
-    .get('/api/reviews?order=invalid')
-    .expect(400)
-    .then(({ body: { msg } }) => {
-      expect(msg).toBe('Invalid order. Please try either asc or desc :-)');
-    });
+  test('400 - order !== "asc" or "desc"', () => {
+    return request(app)
+      .get('/api/reviews?order=invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid order. Please try either asc or desc :-)');
+      });
+  });
+  test('404 - filter by category that does not exist', () => {
+    return request(app)
+      .get('/api/reviews?category=invalid')
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Invalid category. Remember to use underscores "_" instead of spaces for your request :-)'
+        );
+      });
+  });
+  test('200 - category exists but does not have any reviews - respond with empty array', () => {
+    return request(app)
+      .get("/api/reviews?category=children's_games")
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        expect(reviews).toEqual([]);
+      });
+  });
 });
 
 describe('/api/reviews/:review_id', () => {

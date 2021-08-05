@@ -1,4 +1,5 @@
 const db = require('../db/connection');
+const { checkCategoryExists } = require('../db/utils/query-validation');
 
 exports.selectReviewById = async review_id => {
   const result = await db.query(
@@ -55,7 +56,11 @@ exports.updateVotes = async ({ inc_votes, review_id }) => {
   return updatedReview;
 };
 
-exports.selectReviews = async ({ sort_by = 'created_at', order = 'asc' }) => {
+exports.selectReviews = async ({
+  sort_by = 'created_at',
+  order = 'asc',
+  category,
+}) => {
   // sanitize sort_by
   if (
     ![
@@ -83,23 +88,37 @@ exports.selectReviews = async ({ sort_by = 'created_at', order = 'asc' }) => {
     });
   }
 
-  const result = await db.query(`
-    SELECT 
-      reviews.owner, 
-      reviews.title, 
-      reviews.review_id, 
-      reviews.category, 
-      reviews.review_img_url, 
-      reviews.created_at, 
-      reviews.votes, 
-      COUNT(comments.review_id) AS comment_count 
-    FROM reviews 
-    FULL OUTER JOIN comments
-    ON reviews.review_id = comments.review_id
-    GROUP BY reviews.review_id
-    ORDER BY reviews.${sort_by} ${order};`);
+  const whereClause = `WHERE reviews.category = $1`;
+
+  let queryStr = `
+  SELECT 
+    reviews.owner, 
+    reviews.title, 
+    reviews.review_id, 
+    reviews.category, 
+    reviews.review_img_url, 
+    reviews.created_at, 
+    reviews.votes, 
+    COUNT(comments.review_id) AS comment_count 
+  FROM reviews 
+  FULL OUTER JOIN comments
+  ON reviews.review_id = comments.review_id
+  ${category ? whereClause : ''}
+  GROUP BY reviews.review_id
+  ORDER BY reviews.${sort_by} ${order};`;
+
+  // category
+  const pgCategory = category ? category.replace('_', ' ') : ''; // remove underscores
+
+  const result = category
+    ? await db.query(queryStr, [pgCategory])
+    : await db.query(queryStr);
 
   const reviews = result.rows;
+
+  if (!reviews.length) {
+    await checkCategoryExists('categories', 'slug', pgCategory);
+  }
 
   return reviews;
 };
