@@ -53,6 +53,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews')
       .expect(200)
       .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(13);
         reviews.forEach(review => {
           expect(review).toMatchObject({
             owner: expect.any(String),
@@ -72,6 +73,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews')
       .expect(200)
       .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(13);
         expect(reviews).toBeSortedBy('created_at');
       });
   });
@@ -80,6 +82,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?sort_by=votes')
       .expect(200)
       .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(13);
         expect(reviews).toBeSortedBy('votes');
       });
   });
@@ -88,6 +91,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?order=desc')
       .expect(200)
       .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(13);
         expect(reviews).toBeSortedBy('created_at', {
           descending: true,
         });
@@ -98,6 +102,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?sort_by=votes&order=desc')
       .expect(200)
       .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(13);
         expect(reviews).toBeSortedBy('votes', {
           descending: true,
         });
@@ -108,6 +113,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?category=social_deduction')
       .expect(200)
       .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(11);
         reviews.forEach(review => {
           expect(review.category).toBe('social deduction');
         });
