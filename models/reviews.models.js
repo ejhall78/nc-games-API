@@ -1,5 +1,8 @@
 const db = require('../db/connection');
-const { checkCategoryExists } = require('../db/utils/query-validation');
+const {
+  checkCategoryExists,
+  checkReviewExists,
+} = require('../db/utils/query-validation');
 
 exports.selectReviewById = async review_id => {
   const result = await db.query(
@@ -18,7 +21,7 @@ exports.selectReviewById = async review_id => {
   if (result.rows.length === 0) {
     return Promise.reject({
       status: 404,
-      msg: 'Review does not exist. Try a lower number :-)',
+      msg: 'This review does not exist! Please try another one :-)',
     });
   }
 
@@ -121,4 +124,29 @@ exports.selectReviews = async ({
   }
 
   return reviews;
+};
+
+exports.selectCommentsByReview = async review_id => {
+  const result = await db.query(
+    `
+  SELECT 
+    comments.comment_id,
+    comments.votes,
+    comments.created_at,
+    comments.author,
+    comments.body
+  FROM comments
+  JOIN reviews
+  ON reviews.review_id = comments.review_id
+  WHERE reviews.review_id = $1`,
+    [review_id]
+  );
+
+  const comments = result.rows;
+
+  if (!comments.length) {
+    await checkReviewExists('reviews', 'review_id', review_id);
+  }
+  // console.log(comments);
+  return comments;
 };

@@ -201,7 +201,9 @@ describe('/api/reviews/:review_id', () => {
       .get('/api/reviews/1000000')
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Review does not exist. Try a lower number :-)');
+        expect(msg).toBe(
+          'This review does not exist! Please try another one :-)'
+        );
       });
   });
   test('PATCH 200 - updates review votes and responds with the updated review', () => {
@@ -253,7 +255,9 @@ describe('/api/reviews/:review_id', () => {
       .send({ inc_votes: 2 })
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Review does not exist. Try a lower number :-)');
+        expect(msg).toBe(
+          'This review does not exist! Please try another one :-)'
+        );
       });
   });
   test('400 - invalid id', () => {
@@ -280,6 +284,8 @@ describe('/api/reviews/:review_id', () => {
 
 describe('/api/reviews/:review_id/comments', () => {
   // 200 GET - responds with an array of comments for the given review id
+  // 400 - invalid review id
+  // 404 - non existent review
 
   // 201 POST - adds a comment to the db and responds with the posted comment
   test('200 GET - responds with comments for given review id', () => {
@@ -287,7 +293,7 @@ describe('/api/reviews/:review_id/comments', () => {
       .get('/api/reviews/2/comments')
       .expect(200)
       .then(({ body: { comments } }) => {
-        body.forEach(comment => {
+        comments.forEach(comment => {
           expect(comment).toMatchObject({
             comment_id: expect.any(Number),
             votes: expect.any(Number),
@@ -296,6 +302,32 @@ describe('/api/reviews/:review_id/comments', () => {
             body: expect.any(String),
           });
         });
+      });
+  });
+  test('400 - id is invalid', () => {
+    return request(app)
+      .get('/api/reviews/invalid/comments')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid review ID. Please use a number :-)');
+      });
+  });
+  test('404 - valid id but does not exist', () => {
+    return request(app)
+      .get('/api/reviews/1000000/comments')
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'This review does not exist! Please try another one :-)'
+        );
+      });
+  });
+  test('200 - valid review id but no comments on that review - responds with an empty array', () => {
+    return request(app)
+      .get('/api/reviews/4/comments')
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toEqual([]);
       });
   });
 });
