@@ -148,7 +148,7 @@ exports.selectCommentsByReview = async review_id => {
   if (!comments.length) {
     await checkReviewExists('reviews', 'review_id', review_id);
   }
-  // console.log(comments);
+
   return comments;
 };
 
