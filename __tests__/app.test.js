@@ -241,6 +241,24 @@ describe('/api/reviews/:review_id', () => {
         );
       });
   });
+  test('404 - valid id that does not exits', () => {
+    return request(app)
+      .patch('/api/reviews/1000000')
+      .send({ inc_votes: 2 })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Review does not exist. Try a lower number :-)');
+      });
+  });
+  test('400 - invalid id', () => {
+    return request(app)
+      .patch('/api/reviews/invalid')
+      .send({ inc_votes: 2 })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid review ID. Please use a number :-)');
+      });
+  });
   test('400 - other unwanted properties on request body eg { inc_votes : 1, name: "Mitch" }', () => {
     return request(app)
       .patch('/api/reviews/3')
