@@ -285,9 +285,14 @@ describe('/api/reviews/:review_id', () => {
 describe('/api/reviews/:review_id/comments', () => {
   // 200 GET - responds with an array of comments for the given review id
   // 400 - invalid review id
-  // 404 - non existent review
+  // 404 - valid id but non existent review
 
   // 201 POST - adds a comment to the db and responds with the posted comment
+  // 400 - invalid review id
+  // 404 - valid id but non existent review
+  // 400 - missing required fields in request body
+  // 404 - username does not exist
+  // 201 - ignores unwanted properties on the request body
   test('200 GET - responds with comments for given review id', () => {
     return request(app)
       .get('/api/reviews/2/comments')
@@ -328,6 +333,115 @@ describe('/api/reviews/:review_id/comments', () => {
       .expect(200)
       .then(({ body: { comments } }) => {
         expect(comments).toEqual([]);
+      });
+  });
+
+  test('201 POST - adds a comment to the db and responds with the posted comment', () => {
+    return request(app)
+      .post('/api/reviews/4/comments')
+      .send({ username: 'mallionaire', body: 'Great game.' })
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(Object.keys(comment)).toHaveLength(6);
+        expect(comment).toHaveProperty('comment_id');
+        expect(comment.comment_id).toBe(7);
+        expect(comment).toHaveProperty('votes');
+        expect(comment.votes).toBe(0);
+        expect(comment).toHaveProperty('author');
+        expect(comment.author).toBe('mallionaire');
+        expect(comment).toHaveProperty('review_id');
+        expect(comment.review_id).toBe(4);
+        expect(comment).toHaveProperty('body');
+        expect(comment.body).toBe('Great game.');
+        expect(comment).toHaveProperty('created_at');
+      })
+      .then(() => {
+        return db.query('SELECT * FROM comments WHERE review_id = 4');
+      })
+      .then(result => {
+        const commentsForReview4 = result.rows;
+        expect(commentsForReview4).toHaveLength(1);
+        expect(commentsForReview4[0]).toHaveProperty('comment_id');
+        expect(commentsForReview4[0]).toHaveProperty('votes');
+        expect(commentsForReview4[0]).toHaveProperty('author');
+        expect(commentsForReview4[0]).toHaveProperty('review_id');
+        expect(commentsForReview4[0]).toHaveProperty('body');
+        expect(commentsForReview4[0]).toHaveProperty('created_at');
+      });
+  });
+  test('400 - id is invalid', () => {
+    return request(app)
+      .post('/api/reviews/invalid/comments')
+      .send({ username: 'mallionaire', body: 'Great game.' })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid review ID. Please use a number :-)');
+      });
+  });
+  test('404 - valid id but does not exist', () => {
+    return request(app)
+      .post('/api/reviews/1000000/comments')
+      .send({ username: 'mallionaire', body: 'Great game.' })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'This review does not exist! Please try another one :-)'
+        );
+      });
+  });
+  test('400 - no correct fields in request body', () => {
+    return request(app)
+      .post('/api/reviews/4/comments')
+      .send({ wrong: 'stuff' })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Cannot add comment. Please make sure to only include both username and body keys :-)'
+        );
+      });
+  });
+  test('400 - only username in request body', () => {
+    return request(app)
+      .post('/api/reviews/4/comments')
+      .send({ username: 'mallionaire', wrong: 'stuff' })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Cannot add comment. Please make sure to only include both username and body keys :-)'
+        );
+      });
+  });
+  test('400 - only body in request body', () => {
+    return request(app)
+      .post('/api/reviews/4/comments')
+      .send({ body: 'hello', wrong: 'stuff' })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Cannot add comment. Please make sure to only include both username and body keys :-)'
+        );
+      });
+  });
+  test('404 - username does not exist', () => {
+    return request(app)
+      .post('/api/reviews/4/comments')
+      .send({ username: 'hello', body: 'stuff' })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Comment not added. That username does not exist. Please try another one :-)'
+        );
+      });
+  });
+  test('400 - unwanted properties on request body', () => {
+    return request(app)
+      .post('/api/reviews/4/comments')
+      .send({ username: 'hello', body: 'stuff', wrong: 'stuff' })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Comment not added. Please make sure to only include both username and body keys :-)'
+        );
       });
   });
 });

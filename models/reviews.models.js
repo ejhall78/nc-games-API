@@ -2,6 +2,7 @@ const db = require('../db/connection');
 const {
   checkCategoryExists,
   checkReviewExists,
+  checkUserExists,
 } = require('../db/utils/query-validation');
 
 exports.selectReviewById = async review_id => {
@@ -149,4 +150,30 @@ exports.selectCommentsByReview = async review_id => {
   }
   // console.log(comments);
   return comments;
+};
+
+exports.insertComment = async ({ username, body, review_id }) => {
+  if (!username || !body) {
+    return Promise.reject({
+      status: 400,
+      msg: 'Cannot add comment. Please make sure to only include both username and body keys :-)',
+    });
+  }
+
+  await checkReviewExists('reviews', 'review_id', review_id);
+  await checkUserExists('users', 'username', username);
+
+  const result = await db.query(
+    `
+  INSERT INTO comments
+    (author, body, review_id)
+  VALUES
+    ($1, $2, $3)
+  RETURNING *;`,
+    [username, body, review_id]
+  );
+
+  const newComment = result.rows[0];
+
+  return newComment;
 };

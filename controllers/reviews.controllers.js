@@ -3,6 +3,7 @@ const {
   updateVotes,
   selectReviews,
   selectCommentsByReview,
+  insertComment,
 } = require('../models/reviews.models');
 
 exports.getReviewById = (req, res, next) => {
@@ -49,6 +50,27 @@ exports.getCommentsByReview = (req, res, next) => {
   selectCommentsByReview(review_id)
     .then(comments => {
       res.status(200).send({ comments });
+    })
+    .catch(err => next(err));
+};
+
+exports.postComment = (req, res, next) => {
+  const { review_id } = req.params;
+  const { username, body } = req.body;
+
+  const queryObj = { username, body, review_id };
+
+  if (Object.keys(req.body).length > 2) {
+    const err = {
+      status: 400,
+      msg: 'Comment not added. Please make sure to only include both username and body keys :-)',
+    };
+    next(err);
+  }
+
+  insertComment(queryObj)
+    .then(comment => {
+      res.status(201).send({ comment });
     })
     .catch(err => next(err));
 };
