@@ -53,6 +53,8 @@ exports.selectReviews = async ({
   sort_by = 'created_at',
   order = 'asc',
   category,
+  limit = 5,
+  page = 1,
 }) => {
   // sanitize sort_by
   if (
@@ -81,7 +83,9 @@ exports.selectReviews = async ({
     });
   }
 
-  const whereClause = `WHERE reviews.category = $1`;
+  const whereClause = `WHERE reviews.category = $3`;
+
+  const offset = (page - 1) * limit;
 
   let queryStr = `
   SELECT 
@@ -98,18 +102,19 @@ exports.selectReviews = async ({
   ON reviews.review_id = comments.review_id
   ${category ? whereClause : ''}
   GROUP BY reviews.review_id
-  ORDER BY reviews.${sort_by} ${order};`;
+  ORDER BY reviews.${sort_by} ${order}
+  LIMIT $1 OFFSET $2`;
 
   // category
   const pgCategory = category ? category.replace('_', ' ') : ''; // remove underscores
 
   const result = category
-    ? await db.query(queryStr, [pgCategory])
-    : await db.query(queryStr);
+    ? await db.query(queryStr, [limit, offset, pgCategory])
+    : await db.query(queryStr, [limit, offset]);
 
   const reviews = result.rows;
 
-  if (!reviews.length) {
+  if (!reviews.length && category) {
     await checkCategoryExists('categories', 'slug', pgCategory);
   }
 

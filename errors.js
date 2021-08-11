@@ -5,7 +5,9 @@ exports.handle404s = (req, res, next) => {
 exports.pgErrors = (err, req, res, next) => {
   // console.log(err);
   if (err.code === '22P02') {
-    res.status(400).send({ msg: 'Invalid ID. Please use a number :-)' });
+    res.status(400).send({
+      msg: 'Invalid query type. Please use a number for all ID, limit and page queries :-)',
+    });
   } else next(err);
 };
 

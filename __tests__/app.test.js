@@ -55,17 +55,23 @@ describe('/api/reviews', () => {
   // 200 - sorts by an valid column
   // 200 - orders results either asc or desc
   // 200 - filter review results by category
+  // 200 - returns specified number of reviews from limit query - default to 5 items
+  // 200 - returns correct reviews for relevant page
 
   // 400 - sort_by an invalid column
   // 400 - order !== "asc" or "desc"
   // 404 - category that doesn't exist
   // 200 - category that exists but doesn't have any reviews - respond with empty array
+
+  // 400 - invalid limit number
+  // 400 - invalid page number
+  // 200 - valid page number but doesn't exist - send back empty array
   test('GET 200 - responds with an array of reviews', () => {
     return request(app)
       .get('/api/reviews')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(13);
+        expect(reviews).toHaveLength(5);
         reviews.forEach(review => {
           expect(review).toMatchObject({
             owner: expect.any(String),
@@ -85,7 +91,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(13);
+        expect(reviews).toHaveLength(5);
         expect(reviews).toBeSortedBy('created_at');
       });
   });
@@ -94,7 +100,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?sort_by=votes')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(13);
+        expect(reviews).toHaveLength(5);
         expect(reviews).toBeSortedBy('votes');
       });
   });
@@ -103,7 +109,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?order=desc')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(13);
+        expect(reviews).toHaveLength(5);
         expect(reviews).toBeSortedBy('created_at', {
           descending: true,
         });
@@ -114,7 +120,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?sort_by=votes&order=desc')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(13);
+        expect(reviews).toHaveLength(5);
         expect(reviews).toBeSortedBy('votes', {
           descending: true,
         });
@@ -125,10 +131,39 @@ describe('/api/reviews', () => {
       .get('/api/reviews?category=social_deduction')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(11);
+        expect(reviews).toHaveLength(5);
         reviews.forEach(review => {
           expect(review.category).toBe('social deduction');
         });
+      });
+  });
+  test('200 - returns specified number of reviews from limit query - default to 5 items', () => {
+    return request(app)
+      .get('/api/reviews')
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(5);
+      });
+  });
+  test('200 - returns specified number of reviews from limit query', () => {
+    return request(app)
+      .get('/api/reviews?limit=3')
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(3);
+      });
+  });
+  test('200 - returns correct reviews for relevant page', () => {
+    return request(app)
+      .get('/api/reviews?page=2')
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        // second page of reviews sorted by date (default)
+        expect(reviews[0].review_id).toBe(11);
+        expect(reviews[1].review_id).toBe(8);
+        expect(reviews[2].review_id).toBe(2);
+        expect(reviews[3].review_id).toBe(10);
+        expect(reviews[4].review_id).toBe(3);
       });
   });
 
@@ -165,6 +200,35 @@ describe('/api/reviews', () => {
       .get("/api/reviews?category=children's_games")
       .expect(200)
       .then(({ body: { reviews } }) => {
+        expect(reviews).toEqual([]);
+      });
+  });
+  test('400 - invalid limit query', () => {
+    return request(app)
+      .get('/api/reviews?limit=invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
+      });
+  });
+  test('400 - invalid page number', () => {
+    return request(app)
+      .get('/api/reviews?page=invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
+      });
+  });
+  test('200 - valid page number but does not exist - send back empty array', () => {
+    return request(app)
+      .get('/api/reviews?page=100000')
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(0);
         expect(reviews).toEqual([]);
       });
   });
@@ -208,7 +272,9 @@ describe('/api/reviews/:review_id', () => {
       .get('/api/reviews/invalid')
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid ID. Please use a number :-)');
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
       });
   });
   test('404 - valid id but does not exist', () => {
@@ -313,7 +379,9 @@ describe('/api/reviews/:review_id', () => {
       .send({ inc_votes: 2 })
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid ID. Please use a number :-)');
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
       });
   });
 });
@@ -350,7 +418,9 @@ describe('/api/reviews/:review_id/comments', () => {
       .get('/api/reviews/invalid/comments')
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid ID. Please use a number :-)');
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
       });
   });
   test('404 - valid id but does not exist', () => {
@@ -411,7 +481,9 @@ describe('/api/reviews/:review_id/comments', () => {
       .send({ username: 'mallionaire', body: 'Great game.' })
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid ID. Please use a number :-)');
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
       });
   });
   test('404 - valid id but does not exist', () => {
@@ -512,7 +584,9 @@ describe('/api/comments/:comment_id', () => {
       .delete('/api/comments/invalid')
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid ID. Please use a number :-)');
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
       });
   });
   test('404 - valid comment_id but does not exist', () => {
@@ -594,7 +668,9 @@ describe('/api/comments/:comment_id', () => {
       .delete('/api/comments/invalid')
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid ID. Please use a number :-)');
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
       });
   });
   test('404 - valid comment_id but does not exist', () => {

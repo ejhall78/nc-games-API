@@ -35,8 +35,8 @@ exports.patchVotes = (req, res, next) => {
 };
 
 exports.getReviews = (req, res, next) => {
-  const { sort_by, order, category } = req.query;
-  const queryObj = { sort_by, order, category };
+  const { sort_by, order, category, limit, page } = req.query;
+  const queryObj = { sort_by, order, category, limit, page };
 
   selectReviews(queryObj)
     .then(reviews => {
