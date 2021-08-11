@@ -71,7 +71,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(5);
+        expect(reviews).toHaveLength(10);
         reviews.forEach(review => {
           expect(review).toMatchObject({
             owner: expect.any(String),
@@ -91,7 +91,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(5);
+        expect(reviews).toHaveLength(10);
         expect(reviews).toBeSortedBy('created_at');
       });
   });
@@ -100,7 +100,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?sort_by=votes')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(5);
+        expect(reviews).toHaveLength(10);
         expect(reviews).toBeSortedBy('votes');
       });
   });
@@ -109,7 +109,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?order=desc')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(5);
+        expect(reviews).toHaveLength(10);
         expect(reviews).toBeSortedBy('created_at', {
           descending: true,
         });
@@ -120,7 +120,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?sort_by=votes&order=desc')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(5);
+        expect(reviews).toHaveLength(10);
         expect(reviews).toBeSortedBy('votes', {
           descending: true,
         });
@@ -131,7 +131,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews?category=social_deduction')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(5);
+        expect(reviews).toHaveLength(10);
         reviews.forEach(review => {
           expect(review.category).toBe('social deduction');
         });
@@ -142,7 +142,7 @@ describe('/api/reviews', () => {
       .get('/api/reviews')
       .expect(200)
       .then(({ body: { reviews } }) => {
-        expect(reviews).toHaveLength(5);
+        expect(reviews).toHaveLength(10);
       });
   });
   test('200 - returns specified number of reviews from limit query', () => {
@@ -159,11 +159,9 @@ describe('/api/reviews', () => {
       .expect(200)
       .then(({ body: { reviews } }) => {
         // second page of reviews sorted by date (default)
-        expect(reviews[0].review_id).toBe(11);
-        expect(reviews[1].review_id).toBe(8);
-        expect(reviews[2].review_id).toBe(2);
-        expect(reviews[3].review_id).toBe(10);
-        expect(reviews[4].review_id).toBe(3);
+        expect(reviews[0].review_id).toBe(12);
+        expect(reviews[1].review_id).toBe(4);
+        expect(reviews[2].review_id).toBe(7);
       });
   });
 

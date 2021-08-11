@@ -53,7 +53,7 @@ exports.selectReviews = async ({
   sort_by = 'created_at',
   order = 'asc',
   category,
-  limit = 5,
+  limit = 10,
   page = 1,
 }) => {
   // sanitize sort_by
