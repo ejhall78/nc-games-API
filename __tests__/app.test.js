@@ -32,7 +32,7 @@ describe('/api', () => {
 });
 
 describe('/api/categories', () => {
-  test('200 GET - should return an array of the categories on a key of "categories"', () => {
+  test('GET 200 - should return an array of the categories on a key of "categories"', () => {
     return request(app)
       .get('/api/categories')
       .expect(200)
@@ -60,7 +60,7 @@ describe('/api/reviews', () => {
   // 400 - order !== "asc" or "desc"
   // 404 - category that doesn't exist
   // 200 - category that exists but doesn't have any reviews - respond with empty array
-  test('200 GET - responds with an array of reviews', () => {
+  test('GET 200 - responds with an array of reviews', () => {
     return request(app)
       .get('/api/reviews')
       .expect(200)
@@ -175,10 +175,13 @@ describe('/api/reviews/:review_id', () => {
   // 400 - invalid id
   // 404 - valid id but doesn't exist
 
-  // PATCH 201 - updates votes of a review
+  // PATCH 200 - updates review's votes - increase when positive inc_votes
+  // PATCH 200 - updates review's votes - decrease when negative inc_votes
   // 400 - no/invalid key of 'inc_votes' in request body
   // 400 - invalid increment value eg inc_votes: "cat"
   // 400 - other unwanted properties on request body eg { inc_votes : 1, name: 'Mitch' }
+  // 400 - invalid id
+  // 404 - valid id but doesn't exist
 
   test('GET 200 - correctly gets a valid user', () => {
     return request(app)
@@ -205,7 +208,7 @@ describe('/api/reviews/:review_id', () => {
       .get('/api/reviews/invalid')
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid review ID. Please use a number :-)');
+        expect(msg).toBe('Invalid ID. Please use a number :-)');
       });
   });
   test('404 - valid id but does not exist', () => {
@@ -218,7 +221,7 @@ describe('/api/reviews/:review_id', () => {
         );
       });
   });
-  test('PATCH 200 - updates review votes and responds with the updated review', () => {
+  test('PATCH 200 - updates reviews votes - increase when positive inc_votes', () => {
     return request(app)
       .patch('/api/reviews/3')
       .expect(200)
@@ -235,6 +238,27 @@ describe('/api/reviews/:review_id', () => {
           category: 'social deduction',
           created_at: new Date(1610964101251).toJSON(),
           votes: 7,
+          comment_count: '3',
+        });
+      });
+  });
+  test('PATCH 200 - updates reviews votes - decrease when negative inc_votes', () => {
+    return request(app)
+      .patch('/api/reviews/3')
+      .expect(200)
+      .send({ inc_votes: -1 })
+      .then(({ body: { review } }) => {
+        expect(review).toMatchObject({
+          owner: 'bainesface',
+          title: 'Ultimate Werewolf',
+          review_id: 3,
+          review_body: "We couldn't find the werewolf!",
+          designer: 'Akihisa Okui',
+          review_img_url:
+            'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+          category: 'social deduction',
+          created_at: new Date(1610964101251).toJSON(),
+          votes: 4,
           comment_count: '3',
         });
       });
@@ -261,6 +285,17 @@ describe('/api/reviews/:review_id', () => {
         );
       });
   });
+  test('400 - other unwanted properties on request body eg { inc_votes : 1, name: "Mitch" }', () => {
+    return request(app)
+      .patch('/api/reviews/3')
+      .expect(400)
+      .send({ inc_votes: 2, name: 'Mitch' })
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Cannot update votes! Make sure you only include inc_votes on your request :-)'
+        );
+      });
+  });
   test('404 - valid id that does not exits', () => {
     return request(app)
       .patch('/api/reviews/1000000')
@@ -278,34 +313,23 @@ describe('/api/reviews/:review_id', () => {
       .send({ inc_votes: 2 })
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid review ID. Please use a number :-)');
-      });
-  });
-  test('400 - other unwanted properties on request body eg { inc_votes : 1, name: "Mitch" }', () => {
-    return request(app)
-      .patch('/api/reviews/3')
-      .expect(400)
-      .send({ inc_votes: 2, name: 'Mitch' })
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe(
-          'Cannot update votes! Make sure you only include inc_votes on your request :-)'
-        );
+        expect(msg).toBe('Invalid ID. Please use a number :-)');
       });
   });
 });
 
 describe('/api/reviews/:review_id/comments', () => {
-  // 200 GET - responds with an array of comments for the given review id
+  // GET 200 - responds with an array of comments for the given review id
   // 400 - invalid review id
   // 404 - valid id but non existent review
 
-  // 201 POST - adds a comment to the db and responds with the posted comment
+  // POST 201 - adds a comment to the db and responds with the posted comment
   // 400 - invalid review id
   // 404 - valid id but non existent review
   // 400 - missing required fields in request body
   // 404 - username does not exist
   // 201 - ignores unwanted properties on the request body
-  test('200 GET - responds with comments for given review id', () => {
+  test('GET 200 - responds with comments for given review id', () => {
     return request(app)
       .get('/api/reviews/2/comments')
       .expect(200)
@@ -326,7 +350,7 @@ describe('/api/reviews/:review_id/comments', () => {
       .get('/api/reviews/invalid/comments')
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid review ID. Please use a number :-)');
+        expect(msg).toBe('Invalid ID. Please use a number :-)');
       });
   });
   test('404 - valid id but does not exist', () => {
@@ -348,7 +372,7 @@ describe('/api/reviews/:review_id/comments', () => {
       });
   });
 
-  test('201 POST - adds a comment to the db and responds with the posted comment', () => {
+  test('POST 201 - adds a comment to the db and responds with the posted comment', () => {
     return request(app)
       .post('/api/reviews/4/comments')
       .send({ username: 'mallionaire', body: 'Great game.' })
@@ -387,7 +411,7 @@ describe('/api/reviews/:review_id/comments', () => {
       .send({ username: 'mallionaire', body: 'Great game.' })
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid review ID. Please use a number :-)');
+        expect(msg).toBe('Invalid ID. Please use a number :-)');
       });
   });
   test('404 - valid id but does not exist', () => {
@@ -441,7 +465,7 @@ describe('/api/reviews/:review_id/comments', () => {
       .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toBe(
-          'Comment not added. That username does not exist. Please try another one :-)'
+          'That user does not exist! Please try another one :-)'
         );
       });
   });
@@ -453,6 +477,182 @@ describe('/api/reviews/:review_id/comments', () => {
       .then(({ body: { msg } }) => {
         expect(msg).toBe(
           'Comment not added. Please make sure to only include both username and body keys :-)'
+        );
+      });
+  });
+});
+
+describe('/api/comments/:comment_id', () => {
+  // DELETE 204 - deletes the given comment by comment_id and responds with no content
+  // 400 - invalid comment_id
+  // 404 - valid comment_id but does not exist
+
+  // PATCH 200 - updates comment's votes - increase when positive inc_votes
+  // PATCH 200 - updates comment's votes - decrease when negative inc_votes
+  // 400 - no/invalid key of 'inc_votes' in request body
+  // 400 - invalid increment value eg inc_votes: "cat"
+  // 400 - other unwanted properties on request body eg { inc_votes : 1, name: 'Mitch' }
+  // 400 - invalid id
+  // 404 - valid id but doesn't exist
+  test('DELETE 204 - deletes the given comment by comment_id and responds with no content', () => {
+    return request(app)
+      .delete('/api/comments/1')
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+        return db.query('SELECT * FROM comments;');
+      })
+      .then(result => {
+        const comments = result.rows;
+        expect(comments).toHaveLength(5);
+      });
+  });
+  test('400 - invalid comment_id', () => {
+    return request(app)
+      .delete('/api/comments/invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid ID. Please use a number :-)');
+      });
+  });
+  test('404 - valid comment_id but does not exist', () => {
+    return request(app)
+      .delete('/api/comments/1000000')
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'This comment does not exist! Please try another one :-)'
+        );
+      });
+  });
+
+  test('PATCH 200 - updates comments votes - increase when positive inc_votes', () => {
+    return request(app)
+      .patch('/api/comments/1')
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          comment_id: 1,
+          body: 'I loved this game too!',
+          author: 'bainesface',
+          votes: 17,
+          created_at: new Date(1511354613389).toJSON(),
+        });
+      });
+  });
+  test('PATCH 200 - updates comments votes - decrease when negative inc_votes', () => {
+    return request(app)
+      .patch('/api/comments/1')
+      .send({ inc_votes: -1 })
+      .expect(200)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          comment_id: 1,
+          body: 'I loved this game too!',
+          author: 'bainesface',
+          votes: 15,
+          created_at: new Date(1511354613389).toJSON(),
+        });
+      });
+  });
+  test('400 - no/invalid key of inc_votes in request body', () => {
+    return request(app)
+      .patch('/api/comments/1')
+      .expect(400)
+      .send({ invalid_key: 2 })
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Cannot update votes! Make sure you only include a key of "inc_votes" :-)'
+        );
+      });
+  });
+  test('400 - invalid increment value eg inc_votes: "cat"', () => {
+    return request(app)
+      .patch('/api/comments/1')
+      .expect(400)
+      .send({ inc_votes: 'cat' })
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Cannot update votes! Make sure your newVotes value is a number :-)'
+        );
+      });
+  });
+  test('400 - other unwanted properties on request body eg { inc_votes : 1, name: "Mitch" }', () => {
+    return request(app)
+      .patch('/api/comments/1')
+      .expect(400)
+      .send({ inc_votes: 2, name: 'Mitch' })
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Cannot update votes! Make sure you only include inc_votes on your request :-)'
+        );
+      });
+  });
+  test('400 - invalid comment_id', () => {
+    return request(app)
+      .delete('/api/comments/invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid ID. Please use a number :-)');
+      });
+  });
+  test('404 - valid comment_id but does not exist', () => {
+    return request(app)
+      .delete('/api/comments/1000000')
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'This comment does not exist! Please try another one :-)'
+        );
+      });
+  });
+});
+
+describe('/api/users', () => {
+  // GET 200 - responds with users
+
+  // TODO:
+  //      200 - sorts by username by default
+  //      200 - can accept asc / desc to sort usernames
+  test('GET 200 - responds with an array of user objects', () => {
+    return request(app)
+      .get('/api/users')
+      .expect(200)
+      .then(({ body: { users } }) => {
+        expect(users).toHaveLength(4);
+        users.forEach(user => {
+          expect(user).toMatchObject({
+            username: expect.any(String),
+          });
+        });
+      });
+  });
+});
+
+describe('/api/users/:username', () => {
+  // GET 200 - responds with user object
+  // 404 - username doesn't exist
+  test('GET 200 - responds with user object', () => {
+    return request(app)
+      .get('/api/users/mallionaire')
+      .expect(200)
+      .then(({ body: { user } }) => {
+        expect(user).toMatchObject({
+          username: 'mallionaire',
+          name: 'haz',
+          avatar_url:
+            'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
+        });
+      });
+  });
+  test('404 - invalid username', () => {
+    return request(app)
+      .get('/api/users/123')
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'That user does not exist! Please try another one :-)'
         );
       });
   });

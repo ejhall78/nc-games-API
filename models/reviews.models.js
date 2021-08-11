@@ -4,6 +4,7 @@ const {
   checkReviewExists,
   checkUserExists,
 } = require('../db/utils/query-validation');
+const { checkValidInc_Votes } = require('../db/utils/request-body-validation');
 
 exports.selectReviewById = async review_id => {
   const result = await db.query(
@@ -32,19 +33,7 @@ exports.selectReviewById = async review_id => {
 };
 
 exports.updateVotes = async ({ inc_votes, review_id }) => {
-  if (!inc_votes) {
-    return Promise.reject({
-      status: 400,
-      msg: 'Cannot update votes! Make sure you only include a key of "inc_votes" :-)',
-    });
-  }
-
-  if (typeof inc_votes !== 'number') {
-    return Promise.reject({
-      status: 400,
-      msg: 'Cannot update votes! Make sure your newVotes value is a number :-)',
-    });
-  }
+  await checkValidInc_Votes(inc_votes);
 
   await db.query(
     `
