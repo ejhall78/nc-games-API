@@ -3,6 +3,9 @@ const {
   usersFormatter,
   reviewsFormatter,
 } = require('../db/utils/data-manipulation.js');
+const {
+  checkValidInc_Votes,
+} = require('../db/utils/request-body-validation.js');
 
 describe('categoriesFormatter', () => {
   test('returns an empty array when passed an empty array', () => {
@@ -240,5 +243,26 @@ describe('reviewsFormatter', () => {
 
     reviewsFormatter(testData);
     expect(testData).toEqual(testDataCopy);
+  });
+});
+
+describe('checkValidInc_Votes', () => {
+  test('rejects with appropriate message and status 400 when inc_votes is undefined', () => {
+    const inc_votes = undefined;
+    return checkValidInc_Votes(inc_votes).catch(({ status, msg }) => {
+      expect(status).toBe(400);
+      expect(msg).toBe(
+        'Cannot update votes! Make sure you only include a key of "inc_votes" :-)'
+      );
+    });
+  });
+  test('rejects with appropriate message and status 400 when inc_votes is not a number', () => {
+    const inc_votes = 'not a number';
+    return checkValidInc_Votes(inc_votes).catch(({ status, msg }) => {
+      expect(status).toBe(400);
+      expect(msg).toBe(
+        'Cannot update votes! Make sure your newVotes value is a number :-)'
+      );
+    });
   });
 });
