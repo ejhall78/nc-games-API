@@ -604,6 +604,15 @@ describe('/api/reviews/:review_id/comments', () => {
         );
       });
   });
+  test('200 - valid page number but does not exist - send back empty array', () => {
+    return request(app)
+      .get('/api/reviews/2/comments?page=100000')
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toHaveLength(0);
+        expect(comments).toEqual([]);
+      });
+  });
 });
 
 describe('/api/comments/:comment_id', () => {
