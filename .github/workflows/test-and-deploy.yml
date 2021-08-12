@@ -16,7 +16,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 15
-    
+
     - name: Use PostgreSQL
       uses: harmon758/postgresql-action@v1
       with:
@@ -30,16 +30,16 @@ jobs:
     - name: Run tests
       run: PGDATABASE=my_db PGUSER=test_user PGPASSWORD=test_password npm t
 
-    deploy:
-      runs-on: ubuntu-latest
-      needs: test
-      steps:
-        - name: Checkout Repo
-          uses: actions/checkout@v2
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
 
-        - name: Deploy to Heroku
-          uses: akhileshns/heroku-deploy@v3.12.12
-          with:
-            heroku_api_key: $
-            heroku_app_name: $
-            heroku_email: $
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: $
+          heroku_app_name: $
+          heroku_email: $
