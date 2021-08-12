@@ -55,7 +55,7 @@ describe('/api/reviews', () => {
   // 200 - sorts by an valid column
   // 200 - orders results either asc or desc
   // 200 - filter review results by category
-  // 200 - returns specified number of reviews from limit query - default to 5 items
+  // 200 - returns specified number of reviews from limit query - default to 10 items
   // 200 - returns correct reviews for relevant page
 
   // 400 - sort_by an invalid column
@@ -137,7 +137,7 @@ describe('/api/reviews', () => {
         });
       });
   });
-  test('200 - returns specified number of reviews from limit query - default to 5 items', () => {
+  test('200 - returns specified number of reviews from limit query - default to 10 items', () => {
     return request(app)
       .get('/api/reviews')
       .expect(200)
@@ -164,6 +164,17 @@ describe('/api/reviews', () => {
         expect(reviews[2].review_id).toBe(7);
       });
   });
+  // **** TODO ****
+
+  // test('200 - responds with reviews and a total_count property that displays total reviews after filters applied (disregarding limit)', () => {
+  //   return request(app)
+  //     .get('/api/reviews?limit=2&category=social_deduction')
+  //     .expect(200)
+  //     .then(({ body: { reviews, total_count } }) => {
+  //       expect(reviews).toHaveLength(2);
+  //       expect(total_count).toBe(10);
+  //     });
+  // });
 
   test('400 - sort_by an invalid column', () => {
     return request(app)
@@ -388,6 +399,8 @@ describe('/api/reviews/:review_id/comments', () => {
   // GET 200 - responds with an array of comments for the given review id
   // 400 - invalid review id
   // 404 - valid id but non existent review
+  // 200 - returns the specified number of comments based on limit
+  // 200 - returns correct comments when page specified
 
   // POST 201 - adds a comment to the db and responds with the posted comment
   // 400 - invalid review id
@@ -395,11 +408,16 @@ describe('/api/reviews/:review_id/comments', () => {
   // 400 - missing required fields in request body
   // 404 - username does not exist
   // 201 - ignores unwanted properties on the request body
+
+  // 400 - invalid limit number
+  // 400 - invalid page number
+  // 200 - valid page number but doesn't exist - send back empty array
   test('GET 200 - responds with comments for given review id', () => {
     return request(app)
       .get('/api/reviews/2/comments')
       .expect(200)
       .then(({ body: { comments } }) => {
+        expect(comments).toHaveLength(3);
         comments.forEach(comment => {
           expect(comment).toMatchObject({
             comment_id: expect.any(Number),
@@ -437,6 +455,22 @@ describe('/api/reviews/:review_id/comments', () => {
       .expect(200)
       .then(({ body: { comments } }) => {
         expect(comments).toEqual([]);
+      });
+  });
+  test('200 - returns specified number of comments from limit query', () => {
+    return request(app)
+      .get('/api/reviews/2/comments?limit=2')
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toHaveLength(2);
+      });
+  });
+  test('200 - returns correct reviews for relevant page', () => {
+    return request(app)
+      .get('/api/reviews/2/comments?limit=1&page=2')
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments[0].comment_id).toBe(4);
       });
   });
 
@@ -547,6 +581,26 @@ describe('/api/reviews/:review_id/comments', () => {
       .then(({ body: { msg } }) => {
         expect(msg).toBe(
           'Comment not added. Please make sure to only include both username and body keys :-)'
+        );
+      });
+  });
+  test('400 - invalid limit query', () => {
+    return request(app)
+      .get('/api/reviews/2/comments?limit=invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
+      });
+  });
+  test('400 - invalid page number', () => {
+    return request(app)
+      .get('/api/reviews/2/comments?page=invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
         );
       });
   });

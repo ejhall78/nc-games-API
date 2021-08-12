@@ -103,7 +103,7 @@ exports.selectReviews = async ({
   ${category ? whereClause : ''}
   GROUP BY reviews.review_id
   ORDER BY reviews.${sort_by} ${order}
-  LIMIT $1 OFFSET $2`;
+  LIMIT $1 OFFSET $2;`;
 
   // category
   const pgCategory = category ? category.replace('_', ' ') : ''; // remove underscores
@@ -118,10 +118,19 @@ exports.selectReviews = async ({
     await checkCategoryExists('categories', 'slug', pgCategory);
   }
 
+  // const totalCountQueryStr = queryStr.replace('LIMIT $1 OFFSET $2;', ';')
+  // const totalCountResult = await db.query(totalCountQueryStr,)
+
   return reviews;
 };
 
-exports.selectCommentsByReview = async review_id => {
+exports.selectCommentsByReview = async ({
+  limit = 10,
+  page = 1,
+  review_id,
+}) => {
+  const offset = (page - 1) * limit;
+
   const result = await db.query(
     `
   SELECT 
@@ -133,8 +142,9 @@ exports.selectCommentsByReview = async review_id => {
   FROM comments
   JOIN reviews
   ON reviews.review_id = comments.review_id
-  WHERE reviews.review_id = $1`,
-    [review_id]
+  WHERE reviews.review_id = $1
+  LIMIT $2 OFFSET $3`,
+    [review_id, limit, offset]
   );
 
   const comments = result.rows;
