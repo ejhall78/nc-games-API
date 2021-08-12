@@ -164,17 +164,15 @@ describe('/api/reviews', () => {
         expect(reviews[2].review_id).toBe(7);
       });
   });
-  // **** TODO ****
-
-  // test('200 - responds with reviews and a total_count property that displays total reviews after filters applied (disregarding limit)', () => {
-  //   return request(app)
-  //     .get('/api/reviews?limit=2&category=social_deduction')
-  //     .expect(200)
-  //     .then(({ body: { reviews, total_count } }) => {
-  //       expect(reviews).toHaveLength(2);
-  //       expect(total_count).toBe(10);
-  //     });
-  // });
+  test('200 - responds with reviews and a total_count property that displays total reviews after filters applied (disregarding limit)', () => {
+    return request(app)
+      .get('/api/reviews?limit=2&category=social_deduction')
+      .expect(200)
+      .then(({ body: { reviews, total_count } }) => {
+        expect(reviews).toHaveLength(2);
+        expect(total_count).toBe(11);
+      });
+  });
 
   test('400 - sort_by an invalid column', () => {
     return request(app)

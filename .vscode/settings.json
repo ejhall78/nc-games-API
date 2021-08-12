@@ -1,0 +1,13 @@
+{
+  "cSpell.ignoreWords": [
+    "await",
+    "category",
+    "db",
+    "from",
+    "pg",
+    "query",
+    "reviews",
+    "select",
+    "where"
+  ]
+}

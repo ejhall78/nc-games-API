@@ -39,8 +39,8 @@ exports.getReviews = (req, res, next) => {
   const queryObj = { sort_by, order, category, limit, page };
 
   selectReviews(queryObj)
-    .then(reviews => {
-      res.status(200).send({ reviews });
+    .then(({ reviews, total_count }) => {
+      res.status(200).send({ reviews, total_count });
     })
     .catch(err => next(err));
 };

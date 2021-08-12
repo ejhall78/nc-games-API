@@ -114,14 +114,21 @@ exports.selectReviews = async ({
 
   const reviews = result.rows;
 
+  // check if category does not exist or has no reviews
   if (!reviews.length && category) {
     await checkCategoryExists('categories', 'slug', pgCategory);
   }
 
-  // const totalCountQueryStr = queryStr.replace('LIMIT $1 OFFSET $2;', ';')
-  // const totalCountResult = await db.query(totalCountQueryStr,)
+  // separate query to calculate number of reviews taking into account filter but not limit
+  const noLimitResult = category
+    ? await db.query(`SELECT * FROM reviews WHERE reviews.category = $1`, [
+        pgCategory,
+      ])
+    : await db.query(`SELECT * FROM reviews`);
 
-  return reviews;
+  const total_count = noLimitResult.rows.length;
+
+  return { reviews, total_count };
 };
 
 exports.selectCommentsByReview = async ({
