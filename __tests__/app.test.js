@@ -66,6 +66,8 @@ describe('/api/reviews', () => {
   // 400 - invalid limit number
   // 400 - invalid page number
   // 200 - valid page number but doesn't exist - send back empty array
+
+  // POST 201 - adds a review and responds with newly added review
   test('GET 200 - responds with an array of reviews', () => {
     return request(app)
       .get('/api/reviews')
@@ -237,6 +239,32 @@ describe('/api/reviews', () => {
       .then(({ body: { reviews } }) => {
         expect(reviews).toHaveLength(0);
         expect(reviews).toEqual([]);
+      });
+  });
+
+  test.only('POST 201 - adds a review and responds with newly added review', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'mallionaire',
+        title: 'Jenga',
+        review_body: 'This is an example review blah blah blah...',
+        designer: 'Leslie Scott',
+        category: 'dexterity',
+      })
+      .expect(201)
+      .then(({ body: { review } }) => {
+        expect(review).toMatchObject({
+          review_id: 14,
+          votes: 0,
+          created_at: expect.any(String),
+          comment_count: 3,
+          owner: 'mallionaire',
+          title: 'Jenga',
+          review_body: 'This is an example review blah blah blah...',
+          designer: 'Leslie Scott',
+          category: 'dexterity',
+        });
       });
   });
 });

@@ -188,3 +188,43 @@ exports.insertComment = async ({ username, body, review_id }) => {
 
   return newComment;
 };
+
+exports.insertReview = async ({
+  owner,
+  title,
+  review_body,
+  designer,
+  category,
+}) => {
+  const comment_countResult = await db.query(
+    `
+  SELECT COUNT(comments.review_id)
+  AS comment_count
+  FROM reviews
+  FULL OUTER JOIN comments
+  ON reviews.review_id = comments.review_id
+  WHERE reviews.title = $1;`,
+    [title]
+  );
+
+  const { comment_count } = comment_countResult.rows[0];
+
+  const result = await db.query(
+    `
+  INSERT INTO reviews (
+    owner, 
+    title, 
+    review_body, 
+    designer, 
+    category
+  )
+  VALUES ($1, $2, $3, $4, $5)
+  RETURNING *;`,
+    [owner, title, review_body, designer, category]
+  );
+
+  const newReview = result.rows[0];
+  newReview.comment_count = parseInt(comment_count);
+
+  return newReview;
+};

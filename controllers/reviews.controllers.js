@@ -4,6 +4,7 @@ const {
   selectReviews,
   selectCommentsByReview,
   insertComment,
+  insertReview,
 } = require('../models/reviews.models');
 
 exports.getReviewById = (req, res, next) => {
@@ -74,6 +75,16 @@ exports.postComment = (req, res, next) => {
   insertComment(queryObj)
     .then(comment => {
       res.status(201).send({ comment });
+    })
+    .catch(err => next(err));
+};
+
+exports.postReview = (req, res, next) => {
+  const { owner, title, review_body, designer, category } = req.body;
+  const queryObj = { owner, title, review_body, designer, category };
+  insertReview(queryObj)
+    .then(review => {
+      res.status(201).send({ review });
     })
     .catch(err => next(err));
 };
