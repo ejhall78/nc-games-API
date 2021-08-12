@@ -242,7 +242,7 @@ describe('/api/reviews', () => {
       });
   });
 
-  test.only('POST 201 - adds a review and responds with newly added review', () => {
+  test('POST 201 - adds a review and responds with newly added review', () => {
     return request(app)
       .post('/api/reviews')
       .send({
