@@ -196,6 +196,16 @@ exports.insertReview = async ({
   designer,
   category,
 }) => {
+  if (!owner || !title || !review_body || !designer || !category) {
+    return Promise.reject({
+      status: 400,
+      msg: 'Missing required fields. Please make sure to include: owner, title, review_body, designer and category in your request :-)',
+    });
+  }
+
+  await checkUserExists('users', 'username', owner);
+  await checkCategoryExists('categories', 'slug', category);
+
   const comment_countResult = await db.query(
     `
   SELECT COUNT(comments.review_id)

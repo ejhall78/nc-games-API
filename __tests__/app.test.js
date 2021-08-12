@@ -68,6 +68,15 @@ describe('/api/reviews', () => {
   // 200 - valid page number but doesn't exist - send back empty array
 
   // POST 201 - adds a review and responds with newly added review
+  // 404 - username does not exist
+  // 404 - category does not exist
+  // 400 - missing fields (violates NOT NULLs)
+  // 400 - unwanted properties on request body
+
+  /* *** note - error handling to make sure the title, match with the corresponding designer and category
+    would require separate designers' and games' tables. In this case we would only need a game_id in 
+    place of where we have title and the relevant properties could be joined from there */
+
   test('GET 200 - responds with an array of reviews', () => {
     return request(app)
       .get('/api/reviews')
@@ -200,7 +209,7 @@ describe('/api/reviews', () => {
       .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toBe(
-          'Invalid category. Remember to use underscores "_" instead of spaces for your request :-)'
+          'That category does not exist! Remember to use underscores "_" instead of spaces for your request :-)'
         );
       });
   });
@@ -265,6 +274,74 @@ describe('/api/reviews', () => {
           designer: 'Leslie Scott',
           category: 'dexterity',
         });
+      });
+  });
+  test('404 - username does not exist', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'unknown user that does not exist',
+        title: 'Jenga',
+        review_body: 'This is an example review blah blah blah...',
+        designer: 'Leslie Scott',
+        category: 'dexterity',
+      })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'That user does not exist! Please try another one :-)'
+        );
+      });
+  });
+  test('404 - category does not exist', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'mallionaire',
+        title: 'Jenga',
+        review_body: 'This is an example review blah blah blah...',
+        designer: 'Leslie Scott',
+        category: 'not a category',
+      })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'That category does not exist! Remember to use underscores "_" instead of spaces for your request :-)'
+        );
+      });
+  });
+  test('400 - title, review_body or designer are empty (violates NOT NULLs)', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'mallionaire',
+        review_body: 'This is an example review blah blah blah...',
+        designer: 'Leslie Scott',
+        category: 'not a category',
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Missing required fields. Please make sure to include: owner, title, review_body, designer and category in your request :-)'
+        );
+      });
+  });
+  test('400 - unwanted properties on request body', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'mallionaire',
+        review_body: 'This is an example review blah blah blah...',
+        title: 'Jenga',
+        designer: 'Leslie Scott',
+        category: 'not a category',
+        unwanted: 'property',
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Review not added. Please make sure to ONLY include: owner, title, review_body, designer and category in your request :-)'
+        );
       });
   });
 });
@@ -433,7 +510,7 @@ describe('/api/reviews/:review_id/comments', () => {
   // 404 - valid id but non existent review
   // 400 - missing required fields in request body
   // 404 - username does not exist
-  // 201 - ignores unwanted properties on the request body
+  // 400 - unwanted properties on request body
 
   // 400 - invalid limit number
   // 400 - invalid page number

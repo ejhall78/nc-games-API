@@ -9,7 +9,7 @@ exports.checkCategoryExists = async (table, column, value) => {
     // resource does not exist
     return Promise.reject({
       status: 404,
-      msg: 'Invalid category. Remember to use underscores "_" instead of spaces for your request :-)',
+      msg: 'That category does not exist! Remember to use underscores "_" instead of spaces for your request :-)',
     });
   }
 };
