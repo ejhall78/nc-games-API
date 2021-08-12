@@ -747,9 +747,10 @@ describe('/api/comments/:comment_id', () => {
 describe('/api/users', () => {
   // GET 200 - responds with users
 
-  // TODO:
-  //      200 - sorts by username by default
-  //      200 - can accept asc / desc to sort usernames
+  // 200 - sorts by username by default
+  // 200 - can accept asc / desc to sort usernames with order
+
+  // 400 - invalid order
   test('GET 200 - responds with an array of user objects', () => {
     return request(app)
       .get('/api/users')
@@ -761,6 +762,34 @@ describe('/api/users', () => {
             username: expect.any(String),
           });
         });
+      });
+  });
+  test('200 - sorts by username by default', () => {
+    return request(app)
+      .get('/api/users')
+      .expect(200)
+      .then(({ body: { users } }) => {
+        expect(users).toHaveLength(4);
+        expect(users).toBeSortedBy('username');
+      });
+  });
+  test('200 - can accept asc / desc to sort usernames with order', () => {
+    return request(app)
+      .get('/api/users?order=desc')
+      .expect(200)
+      .then(({ body: { users } }) => {
+        expect(users).toHaveLength(4);
+        expect(users).toBeSortedBy('username', { descending: true });
+      });
+  });
+  test('400 - invalid order', () => {
+    return request(app)
+      .get('/api/users?order=invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Invalid order query. Please use either ASC/asc or DESC/desc :-)'
+        );
       });
   });
 });
