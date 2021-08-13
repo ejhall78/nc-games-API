@@ -15,7 +15,9 @@ describe('/*', () => {
       .expect(404)
       .then(res => {
         const message = res.body.msg;
-        expect(message).toBe("Oh no! That doesn't exist!");
+        expect(message).toBe(
+          'Welcome to the home page! Head over to /api to read about all the endpoints available on this API. Enjoy!'
+        );
       });
   });
 });
