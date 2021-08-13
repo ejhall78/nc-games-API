@@ -32,6 +32,13 @@ describe('/api', () => {
 });
 
 describe('/api/categories', () => {
+  // GET 200 - should return an array of the categories on a key of "categories"
+
+  // POST 201 - adds a new category and responds with the newly added category
+  // 400 - category already exists (same slug)
+  // 400 - missing required properties on req body
+  // 400 - unwanted properties on req body
+
   test('GET 200 - should return an array of the categories on a key of "categories"', () => {
     return request(app)
       .get('/api/categories')
@@ -45,6 +52,63 @@ describe('/api/categories', () => {
             description: expect.any(String),
           });
         });
+      });
+  });
+  test('POST 201 - adds a new category and responds with the newly added category', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({ slug: 'example category', description: 'example description' })
+      .expect(201)
+      .then(({ body: { category } }) => {
+        expect(category).toMatchObject({
+          slug: 'example category',
+          description: 'example description',
+        });
+        return db.query('SELECT * FROM categories;');
+      })
+      .then(result => {
+        const allCategories = result.rows;
+        expect(allCategories).toHaveLength(5);
+      });
+  });
+  test('400 - category already exists (same slug)', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({
+        slug: 'social deduction',
+        description: 'This category already exists',
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('That already exists! Please try again :-)');
+      });
+  });
+  test('400 - missing required properties on req body', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({
+        slug: 'example category',
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Category not added. Please sure to include only slug and description properties :-)'
+        );
+      });
+  });
+  test('400 - unwanted properties on req body', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({
+        slug: 'example category',
+        description: 'This category already exists',
+        something_else: 'unwanted',
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Category not added. Please sure to include only slug and description properties :-)'
+        );
       });
   });
 });

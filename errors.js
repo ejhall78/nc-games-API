@@ -8,6 +8,10 @@ exports.pgErrors = (err, req, res, next) => {
     res.status(400).send({
       msg: 'Invalid query type. Please use a number for all ID, limit and page queries :-)',
     });
+  } else if (err.code === '23505') {
+    res.status(400).send({
+      msg: 'That already exists! Please try again :-)',
+    });
   } else next(err);
 };
 

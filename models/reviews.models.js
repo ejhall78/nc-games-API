@@ -196,7 +196,7 @@ exports.insertReview = async ({
   designer,
   category,
 }) => {
-  if (!owner || !title || !review_body || !designer || !category) {
+  if (!title || !review_body || !designer) {
     return Promise.reject({
       status: 400,
       msg: 'Missing required fields. Please make sure to include: owner, title, review_body, designer and category in your request :-)',
