@@ -1016,7 +1016,7 @@ describe('/api/users/:username', () => {
         });
       });
   });
-  test('404 - invalid username', () => {
+  test('404 - username does not exist', () => {
     return request(app)
       .get('/api/users/123')
       .expect(404)

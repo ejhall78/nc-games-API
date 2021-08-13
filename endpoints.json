@@ -14,6 +14,20 @@
       ]
     }
   },
+  "POST /api/categories": {
+    "description": "adds a new category to the database and responds with newly added category",
+    "queries": [],
+    "exampleRequestBody": {
+      "slug": "example category",
+      "description": "example description"
+    },
+    "exampleResponse": {
+      "category": {
+        "slug": "example category",
+        "description": "example description"
+      }
+    }
+  },
   "GET /api/reviews": {
     "description": "serves an array of all reviews",
     "queries": ["category", "sort_by", "order"],
@@ -38,24 +52,46 @@
       ]
     }
   },
+  "POST /api/reviews": {
+    "description": "adds a new review to the database and responds with newly added review",
+    "queries": [],
+    "exampleRequestBody": {
+      "owner": "mallionaire",
+      "title": "Jenga",
+      "review_body": "This is an example review blah blah blah...",
+      "designer": "Leslie Scott",
+      "category": "dexterity"
+    },
+    "exampleResponse": {
+      "review": {
+        "review_id": 14,
+        "votes": 0,
+        "created_at": "2021-01-18T10:01:41.251Z",
+        "comment_count": 3,
+        "owner": "mallionaire",
+        "title": "Jenga",
+        "review_body": "This is an example review blah blah blah...",
+        "designer": "Leslie Scott",
+        "category": "dexterity"
+      }
+    }
+  },
   "GET /api/reviews/:review_id": {
     "description": "serves a review object specified by it's id",
     "queries": [],
     "exampleResponse": {
-      "review": [
-        {
-          "review_id": 1,
-          "title": "Ultimate Werewolf",
-          "review_body": "We couldn't find the werewolf!",
-          "designer": "Akihisa Okui",
-          "review_img_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
-          "votes": 7,
-          "category": "social deduction",
-          "owner": "bainesface",
-          "created_at": "2021-01-18T10:01:41.251Z",
-          "comment_count": 3
-        }
-      ]
+      "review": {
+        "review_id": 1,
+        "title": "Ultimate Werewolf",
+        "review_body": "We couldn't find the werewolf!",
+        "designer": "Akihisa Okui",
+        "review_img_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+        "votes": 7,
+        "category": "social deduction",
+        "owner": "bainesface",
+        "created_at": "2021-01-18T10:01:41.251Z",
+        "comment_count": 3
+      }
     }
   },
   "PATCH /api/reviews/:review_id": {
@@ -79,11 +115,16 @@
       ]
     }
   },
+  "DELETE /api/reviews/:review_id": {
+    "description": "deletes a given review by review_id",
+    "queries": [],
+    "exampleResponse": {}
+  },
   "GET /api/reviews/:review_id/comments": {
     "description": "serves an array of comments for the given review_id",
     "queries": [],
     "exampleResponse": {
-      "review": [
+      "comments": [
         {
           "comment_id": 1,
           "votes": 16,
@@ -112,6 +153,39 @@
           "body": "Great game."
         }
       ]
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes a given comment by comment_id",
+    "queries": [],
+    "exampleResponse": {}
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "allows the ability to increment votes of a specific comment",
+    "queries": [],
+    "exampleRequestBody": { "inc_votes": 1 },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 1,
+        "body": "I loved this game too!",
+        "author": "bainesface",
+        "votes": 17,
+        "created_at": "2017-11-22T12:43:33.389Z"
+      }
+    }
+  },
+  "GET /api/users": {
+    "description": "serves an array of users' usernames",
+    "queries": ["order"],
+    "exampleResponse": {
+      "users": [{ "username": "mallionaire" }, { "username": "etc..." }]
+    }
+  },
+  "GET /api/users:username": {
+    "description": "serves an array of users' usernames",
+    "queries": [],
+    "exampleResponse": {
+      "user": { "username": "mallionaire" }
     }
   }
 }
