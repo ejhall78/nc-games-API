@@ -423,6 +423,10 @@ describe('/api/reviews/:review_id', () => {
   // 400 - invalid id
   // 404 - valid id but doesn't exist
 
+  // DELETE 204 - deletes the given review by review_id
+  // 400 - invalid id
+  // 404 - valid id but doesn't exist
+
   test('GET 200 - correctly gets a valid user', () => {
     return request(app)
       .get('/api/reviews/2')
@@ -557,6 +561,39 @@ describe('/api/reviews/:review_id', () => {
       .then(({ body: { msg } }) => {
         expect(msg).toBe(
           'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
+      });
+  });
+
+  test('DELETE 204 - deletes the given review by review_id', () => {
+    return request(app)
+      .delete('/api/reviews/2')
+      .expect(204)
+      .then(() => {
+        return db.query('SELECT * FROM reviews');
+      })
+      .then(result => {
+        const reviews = result.rows;
+        expect(reviews).toHaveLength(12);
+      });
+  });
+  test('400 - invalid id', () => {
+    return request(app)
+      .delete('/api/reviews/invalid')
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'Invalid query type. Please use a number for all ID, limit and page queries :-)'
+        );
+      });
+  });
+  test('404 - valid id that does not exits', () => {
+    return request(app)
+      .delete('/api/reviews/1000000')
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          'This review does not exist! Please try another one :-)'
         );
       });
   });

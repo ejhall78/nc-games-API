@@ -5,6 +5,7 @@ const {
   selectCommentsByReview,
   insertComment,
   insertReview,
+  deleteReview,
 } = require('../models/reviews.models');
 
 exports.getReviewById = (req, res, next) => {
@@ -83,14 +84,6 @@ exports.postReview = (req, res, next) => {
   const { owner, title, review_body, designer, category } = req.body;
   const queryObj = { owner, title, review_body, designer, category };
 
-  if (!title || !review_body || !designer) {
-    const err = {
-      status: 400,
-      msg: 'Missing required fields. Please make sure to include: owner, title, review_body, designer and category in your request :-)',
-    };
-    next(err);
-  }
-
   if (Object.keys(req.body).length > 5) {
     const err = {
       status: 400,
@@ -102,6 +95,16 @@ exports.postReview = (req, res, next) => {
   insertReview(queryObj)
     .then(review => {
       res.status(201).send({ review });
+    })
+    .catch(err => next(err));
+};
+
+exports.deleteReviewByID = (req, res, next) => {
+  const { review_id } = req.params;
+
+  deleteReview(review_id)
+    .then(() => {
+      res.status(204).send({});
     })
     .catch(err => next(err));
 };

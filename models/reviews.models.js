@@ -238,3 +238,13 @@ exports.insertReview = async ({
 
   return newReview;
 };
+
+exports.deleteReview = async review_id => {
+  await checkReviewExists('reviews', 'review_id', review_id);
+  await db.query(
+    `
+  DELETE FROM reviews
+  WHERE review_id = $1`,
+    [review_id]
+  );
+};
