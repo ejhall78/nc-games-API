@@ -181,11 +181,15 @@
       "users": [{ "username": "mallionaire" }, { "username": "etc..." }]
     }
   },
-  "GET /api/users:username": {
-    "description": "serves an array of users' usernames",
+  "GET /api/users/:username": {
+    "description": "serves a user object",
     "queries": [],
     "exampleResponse": {
-      "user": { "username": "mallionaire" }
+      "user": {
+        "username": "mallionaire",
+        "name": "haz",
+        "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+      }
     }
   }
 }
