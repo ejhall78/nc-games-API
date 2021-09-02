@@ -98,11 +98,11 @@ exports.selectReviews = async ({
     reviews.votes, 
     COUNT(comments.review_id) AS comment_count 
   FROM reviews 
-  FULL OUTER JOIN comments
+  LEFT JOIN comments
   ON reviews.review_id = comments.review_id
   ${category ? whereClause : ''}
   GROUP BY reviews.review_id
-  ORDER BY reviews.${sort_by} ${order}
+  ORDER BY ${sort_by} ${order}
   LIMIT $1 OFFSET $2;`;
 
   // category

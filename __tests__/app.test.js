@@ -172,13 +172,13 @@ describe('/api/reviews', () => {
         expect(reviews).toBeSortedBy('created_at');
       });
   });
-  test('200 - sort reviews by any valid column', () => {
+  test.only('200 - sort reviews by any valid column', () => {
     return request(app)
-      .get('/api/reviews?sort_by=votes')
+      .get('/api/reviews?sort_by=comment_count')
       .expect(200)
       .then(({ body: { reviews } }) => {
         expect(reviews).toHaveLength(10);
-        expect(reviews).toBeSortedBy('votes');
+        expect(reviews).toBeSortedBy('comment_count');
       });
   });
   test('200 - orders results either asc or desc - default by date when no sort_by', () => {
