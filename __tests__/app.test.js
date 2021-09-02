@@ -635,6 +635,17 @@ describe('/api/reviews/:review_id/comments', () => {
         });
       });
   });
+  test('200 - orders by date desc by default', () => {
+    return request(app)
+      .get('/api/reviews/2/comments')
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toHaveLength(3);
+        expect(comments).toBeSortedBy('created_at', {
+          descending: true,
+        });
+      });
+  });
   test('400 - id is invalid', () => {
     return request(app)
       .get('/api/reviews/invalid/comments')
@@ -671,12 +682,12 @@ describe('/api/reviews/:review_id/comments', () => {
         expect(comments).toHaveLength(2);
       });
   });
-  test('200 - returns correct reviews for relevant page', () => {
+  test('200 - returns correct comments for relevant page', () => {
     return request(app)
       .get('/api/reviews/2/comments?limit=1&page=2')
       .expect(200)
       .then(({ body: { comments } }) => {
-        expect(comments[0].comment_id).toBe(4);
+        expect(comments[0].comment_id).toBe(1);
       });
   });
 

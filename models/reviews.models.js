@@ -150,6 +150,7 @@ exports.selectCommentsByReview = async ({
   JOIN reviews
   ON reviews.review_id = comments.review_id
   WHERE reviews.review_id = $1
+  ORDER BY created_at DESC
   LIMIT $2 OFFSET $3`,
     [review_id, limit, offset]
   );
