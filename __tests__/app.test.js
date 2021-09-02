@@ -172,7 +172,7 @@ describe('/api/reviews', () => {
         expect(reviews).toBeSortedBy('created_at');
       });
   });
-  test.only('200 - sort reviews by any valid column', () => {
+  test('200 - sort reviews by any valid column', () => {
     return request(app)
       .get('/api/reviews?sort_by=comment_count')
       .expect(200)
