@@ -622,29 +622,41 @@ describe('/api/reviews/:review_id/comments', () => {
     return request(app)
       .get('/api/reviews/2/comments')
       .expect(200)
-      .then(({ body: { comments } }) => {
-        expect(comments).toHaveLength(3);
-        comments.forEach(comment => {
-          expect(comment).toMatchObject({
-            comment_id: expect.any(Number),
-            votes: expect.any(Number),
-            created_at: expect.any(String),
-            author: expect.any(String),
-            body: expect.any(String),
+      .then(
+        ({
+          body: {
+            comments: { comments },
+          },
+        }) => {
+          expect(comments).toHaveLength(3);
+          comments.forEach(comment => {
+            expect(comment).toMatchObject({
+              comment_id: expect.any(Number),
+              votes: expect.any(Number),
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+            });
           });
-        });
-      });
+        }
+      );
   });
   test('200 - orders by date desc by default', () => {
     return request(app)
       .get('/api/reviews/2/comments')
       .expect(200)
-      .then(({ body: { comments } }) => {
-        expect(comments).toHaveLength(3);
-        expect(comments).toBeSortedBy('created_at', {
-          descending: true,
-        });
-      });
+      .then(
+        ({
+          body: {
+            comments: { comments },
+          },
+        }) => {
+          expect(comments).toHaveLength(3);
+          expect(comments).toBeSortedBy('created_at', {
+            descending: true,
+          });
+        }
+      );
   });
   test('400 - id is invalid', () => {
     return request(app)
@@ -670,27 +682,52 @@ describe('/api/reviews/:review_id/comments', () => {
     return request(app)
       .get('/api/reviews/4/comments')
       .expect(200)
-      .then(({ body: { comments } }) => {
-        expect(comments).toEqual([]);
-      });
+      .then(
+        ({
+          body: {
+            comments: { comments },
+          },
+        }) => {
+          expect(comments).toEqual([]);
+        }
+      );
   });
   test('200 - returns specified number of comments from limit query', () => {
     return request(app)
       .get('/api/reviews/2/comments?limit=2')
       .expect(200)
-      .then(({ body: { comments } }) => {
-        expect(comments).toHaveLength(2);
-      });
+      .then(
+        ({
+          body: {
+            comments: { comments },
+          },
+        }) => {
+          expect(comments).toHaveLength(2);
+        }
+      );
   });
   test('200 - returns correct comments for relevant page', () => {
     return request(app)
       .get('/api/reviews/2/comments?limit=1&page=2')
       .expect(200)
+      .then(
+        ({
+          body: {
+            comments: { comments },
+          },
+        }) => {
+          expect(comments[0].comment_id).toBe(1);
+        }
+      );
+  });
+  test('200 - returns a total_count for number of comments for given review', () => {
+    return request(app)
+      .get('/api/reviews/2/comments')
+      .expect(200)
       .then(({ body: { comments } }) => {
-        expect(comments[0].comment_id).toBe(1);
+        expect(comments.total_count).toBe(3);
       });
   });
-
   test('POST 201 - adds a comment to the db and responds with the posted comment', () => {
     return request(app)
       .post('/api/reviews/4/comments')
@@ -825,10 +862,16 @@ describe('/api/reviews/:review_id/comments', () => {
     return request(app)
       .get('/api/reviews/2/comments?page=100000')
       .expect(200)
-      .then(({ body: { comments } }) => {
-        expect(comments).toHaveLength(0);
-        expect(comments).toEqual([]);
-      });
+      .then(
+        ({
+          body: {
+            comments: { comments },
+          },
+        }) => {
+          expect(comments).toHaveLength(0);
+          expect(comments).toEqual([]);
+        }
+      );
   });
 });
 

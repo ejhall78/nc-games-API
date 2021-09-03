@@ -161,7 +161,19 @@ exports.selectCommentsByReview = async ({
     await checkReviewExists('reviews', 'review_id', review_id);
   }
 
-  return comments;
+  // separate query to calculate number of reviews taking into account filter but not limit
+  const noLimitResult = await db.query(
+    `
+  SELECT * FROM comments
+  JOIN reviews
+  ON reviews.review_id = comments.review_id
+  WHERE reviews.review_id = $1`,
+    [review_id]
+  );
+
+  const total_count = noLimitResult.rows.length;
+
+  return { comments, total_count };
 };
 
 exports.insertComment = async ({ username, body, review_id }) => {
