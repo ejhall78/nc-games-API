@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-The purpose of this project is to build an API that allows access to application data programmatically. This will serve as the back-end of my project. Here is a like to the front-end so you can have a look: https://nc-games-ejhall78.netlify.app/
+The purpose of this project is to build an API that allows access to application data programmatically. This will serve as the back-end of my project. Here is a like to the front-end so you can have a look: https://nc-games-ejhall78.netlify.app/ https://github.com/ejhall78/nc-games
 
 The theme of the data is board games! Users can create, read, update and delete reviews of certain board games; comments on said reviews; the users that made the comments and the game categories.
 
