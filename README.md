@@ -52,7 +52,7 @@ In order to set up a local database we first need to delete any databases you ma
 
 Then we need to create our db
 
-This is all set up for you in the file `db/setup.sql`
+This is all set up for you in the file `/db/setup.sql`
 
 There is a script set up for you in the `package.json`, type the following into your terminal to run the script:
 
@@ -62,7 +62,7 @@ npm run setup-dbs
 
 Next we need to create the structure of our database and seed some data to populate it
 
-This has been done in `db/seeds/seed.js`
+This has been done in `/db/seeds/seed.js`
 
 There is also a script that will cover this:
 
@@ -74,7 +74,7 @@ npm run seed
 
 ### .env files
 
-You will need to create two .env files: `.env.test` and `.env.development`. Into each, add `PGDATABASE=<database_name_here>`, with the correct database name for that environment (see /db/setup.sql for the database names). Double check that these .env files are .gitignored.
+You will need to create two .env files: `.env.test` and `.env.development` in the root directory. Into each, add `PGDATABASE=<database_name_here>`, with the correct database name for that environment (see /db/setup.sql for the database names). Double check that these .env files are .gitignored.
 
 ### Running the tests
 
