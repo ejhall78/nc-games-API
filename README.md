@@ -22,6 +22,11 @@ If you want to run the app on your own machine, there are a few steps to setting
 ## Cloning the repo
 
 - cd (change directory) into the location where you want to save this on your machine
+
+```
+cd <desired location>
+```
+
 - Press the green Code button on the repo on GitHub
 - Copy the relevant link whether you are using HTTPS or SSH
 - In your desired directory on your local machine, type the following and hit enter:
@@ -31,6 +36,11 @@ git clone <paste link from GitHub here>
 ```
 
 - cd into be-nc-games
+
+```
+cd be-nc-games
+```
+
 - You have now successfully cloned the repo and may choose to open it with your code editor of choice
 - Hint: if you use VSCode, type the following and press enter to open your current directory:
 
