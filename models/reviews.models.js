@@ -12,7 +12,7 @@ exports.selectReviewById = async review_id => {
     SELECT reviews.*, COUNT(comments.review_id) 
     AS comment_count 
     FROM reviews 
-    JOIN comments
+    LEFT JOIN comments
     ON reviews.review_id = comments.review_id
     WHERE reviews.review_id = $1
     GROUP BY reviews.review_id;`,
@@ -224,7 +224,7 @@ exports.insertReview = async ({
   SELECT COUNT(comments.review_id)
   AS comment_count
   FROM reviews
-  FULL OUTER JOIN comments
+  LEFT JOIN comments
   ON reviews.review_id = comments.review_id
   WHERE reviews.title = $1;`,
     [title]

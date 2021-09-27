@@ -413,7 +413,7 @@ describe('/api/reviews', () => {
 });
 
 describe('/api/reviews/:review_id', () => {
-  // GET 200 - gets user by id
+  // GET 200 - gets review by id
   // 400 - invalid id
   // 404 - valid id but doesn't exist
 
@@ -429,7 +429,7 @@ describe('/api/reviews/:review_id', () => {
   // 400 - invalid id
   // 404 - valid id but doesn't exist
 
-  test('GET 200 - correctly gets a valid user', () => {
+  test('GET 200 - correctly gets a valid review', () => {
     return request(app)
       .get('/api/reviews/2')
       .expect(200)
