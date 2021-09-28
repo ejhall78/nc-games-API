@@ -8,7 +8,7 @@ https://nc-games-ejhall78.netlify.app/
 
 https://github.com/ejhall78/nc-games
 
-The theme of the data is board games! Users can create, read, update and delete reviews of certain board games; comments on said reviews; the users that made the comments and the game categories.
+The theme of the data is board games! Users can create, read, update and delete reviews of certain board games; comments on said reviews; the users that made the comments and the game categories
 
 Here is a link to the API so you can try it out for yourself: https://be-nc-games-ejhall78.herokuapp.com/
 
